@@ -67,7 +67,7 @@ export default function Home() {
     <main className={styles.main}>
       <div className={styles.quotebox}>
         <p className={styles.quotenum}>ADVICE #{quoteId}</p>
-        <p className={styles.quote}>"{quote}"</p>
+        <p className={styles.quote}>{quote}</p>
         <Image
           src={divImage}
           alt="Divider Img"
