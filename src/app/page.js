@@ -1,95 +1,85 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+"use client";
+
+import Image from "next/image";
+import styles from "./page.module.css";
+import { useState, useEffect } from "react";
 
 export default function Home() {
+  // Sets states for window size
+  const [windowSize, setWindowSize] = useState([
+    typeof window !== "undefined" ? window.innerWidth : 0,
+    typeof window !== "undefined" ? window.innerHeight : 0,
+  ]);
+
+  // States for quote
+  const [quoteId, setQuoteId] = useState(0);
+  const [quote, setQuote] = useState(`Loading...`);
+
+  // div image state
+  const [divImage, setDivImage] = useState("pattern-divider-desktop.svg");
+
+  // div wifth state
+  const [divWidth, setDivWidth] = useState(520);
+
+  //Function to get quote
+  async function getQuote() {
+    const response = await fetch("https://api.adviceslip.com/advice");
+    const randomQuote = await response.json();
+
+    setQuoteId(randomQuote.slip.id);
+    setQuote(`${randomQuote.slip.advice}`);
+  }
+
+  // Handles resizing of window
+  useEffect(() => {
+    const handleWindowResize = () => {
+      setWindowSize([window.innerWidth, window.innerHeight]);
+    };
+
+    getQuote();
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("resize", handleWindowResize);
+
+      return () => {
+        window.removeEventListener("resize", handleWindowResize);
+      };
+    }
+  }, []);
+
+  // Handles the resizing and setting of divider img
+  useEffect(() => {
+    const desktopDiv = "pattern-divider-desktop.svg";
+    const mobileDiv = "pattern-divider-mobile.svg";
+
+    if (windowSize[0] >= 600) {
+      setDivWidth(520);
+      setDivImage(desktopDiv);
+    }
+
+    if (windowSize[0] <= 599) {
+      setDivWidth(320);
+      setDivImage(mobileDiv);
+    }
+  }, [windowSize]);
+
   return (
     <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.js</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className={styles.center}>
+      <div className={styles.quotebox}>
+        <p className={styles.quotenum}>ADVICE #{quoteId}</p>
+        <p className={styles.quote}>"{quote}"</p>
         <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
+          src={divImage}
+          alt="Divider Img"
+          width={divWidth}
+          height="16"
+          className={styles.div}
+          priority={true}
         />
       </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
+      <button className={styles.button} onClick={getQuote}>
+        <Image src="icon-dice.svg" width="24" height="24" alt="Dice Icon" />
+      </button>
     </main>
-  )
+  );
 }
